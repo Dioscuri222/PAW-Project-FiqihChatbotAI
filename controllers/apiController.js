@@ -13,18 +13,40 @@ exports.status = (req, res) => {
   });
 };
 
-exports.produk = (req, res) => {
-  const data = ProdukModel.getAll();
-
-  // Jika client meminta format array murni (?format=array atau ?raw=true)
-  if (req.query.format === 'array' || req.query.raw === 'true') {
-    return res.json(data);
+exports.produk = async (req, res) => {
+  try {
+    const data = await ProdukModel.getAll();
+    if (req.query.format === 'array') return res.json(data);
+    res.json({ sukses: true, jumlah: data.length, data });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
+};
 
-  // Format standar objek yang membungkus data array JSON (sesuai referensi Week 7)
-  res.json({
-    sukses: true,
-    jumlah: data.length,
-    data,
-  });
+exports.getProdukById = async (req, res) => {
+  try {
+    const data = await ProdukModel.getById(req.params.id);
+    data ? res.json(data) : res.status(404).json({ pesan: 'Tidak ditemukan' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+};
+
+exports.createProduk = async (req, res) => {
+  try {
+    const newData = await ProdukModel.create(req.body);
+    res.status(201).json({ sukses: true, data: newData });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+};
+
+exports.updateProduk = async (req, res) => {
+  try {
+    const updatedData = await ProdukModel.update(req.params.id, req.body);
+    res.json({ sukses: true, data: updatedData });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+};
+
+exports.deleteProduk = async (req, res) => {
+  try {
+    await ProdukModel.delete(req.params.id);
+    res.json({ sukses: true, pesan: 'Data dihapus' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 };
