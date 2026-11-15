@@ -33,6 +33,8 @@ const TOPIK = new RegExp(
     'bayi tabung', 'kb', 'aborsi', 'vaksin', 'makanan', 'minuman', 'gelatin',
     'buku', 'kitab', 'modul', 'katalog', 'referensi', 'rujukan', 'sumber', 'penulis', 'tersedia', 'aplikasi', 'fitur',
     'informasi', 'harga', 'stok', 'format', 'kategori',
+    'nisab', 'haul', 'asnaf', 'mustahik', 'muzaki', 'fitrah', 'fidyah', 'kafarat', 'qadha', 'tayamum',
+    'ijtihad', 'maqashid', 'maqasid', 'madzhab', 'mazhab', 'rukhsah', 'tarjih',
   ].join('|'),
   'i'
 );

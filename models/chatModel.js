@@ -6,14 +6,19 @@ const ProdukModel = require('./produkModel');
 const STOPWORDS = new Set([
   'yang', 'dan', 'atau', 'di', 'ke', 'dari', 'untuk', 'dengan', 'apa', 'apakah', 'bagaimana',
   'bolehkah', 'adalah', 'ini', 'itu', 'saya', 'aku', 'kamu', 'anda', 'ada', 'tidak', 'bisa',
-  'hukum', 'dalam', 'pada', 'saja', 'tentang', 'mengenai', 'kah', 'jika', 'kalau', 'seperti', 'para',
+  'hukum', 'hukumnya', 'dalam', 'pada', 'saja', 'tentang', 'mengenai', 'kah', 'jika', 'kalau',
+  'seperti', 'para', 'menurut', 'buku', 'kitab', 'modul', 'katalog', 'referensi', 'rujukan',
+  'tersedia', 'aplikasi', 'daftar',
 ]);
 
 // Variasi ejaan yang umum pada literatur fiqih (satu kelompok = kata yang sama)
 const VARIAN = [
   ['sholat', 'shalat', 'salat', 'solat'],
   ['wudhu', 'wudu', 'wudlu'],
+  ['tayamum', 'tayammum'],
   ['zakat', 'zakah'],
+  ['profesi', 'pencarian', 'penghasilan', 'gaji'],
+  ['maqashid', 'maqasid', 'maqoshid'],
   ['puasa', 'shaum', 'shiyam', 'saum'],
   ['haid', 'haidh', 'haidl'],
   ['fiqih', 'fikih', 'fiqh'],
