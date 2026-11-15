@@ -1,22 +1,20 @@
 # FiqihAI — Sistem Tanya Jawab & Rujukan Fiqih Kontemporer
 
-> **Tugas Praktikum Pengembangan Aplikasi Web (PPAW) — Week 7**  
-> **Kelas:** E (Kelompok)  
+> **Tugas Praktikum Pengembangan Aplikasi Web (PPAW) — Week 7 s.d. Week 9**  
+> **Kelas:** E (Kelompok 4)  
 > **Metode SDLC:** Waterfall  
-> **Arsitektur:** Model-View-Controller (MVC) — Express.js, EJS, Tailwind CSS (CDN)
+> **Arsitektur:** Model-View-Controller (MVC) — Express.js, EJS, Tailwind CSS (CDN), PostgreSQL, Google Gemini AI
 
 ---
 
 ## 📌 Deskripsi Proyek
 
-Proyek ini adalah implementasi Week 7 untuk aplikasi berkelanjutan **FiqihAI**, yaitu platform sistem tanya jawab fikih kontemporer berbasis kecerdasan buatan (Gemini AI & RAG) yang merujuk pada himpunan fatwa Syekh Dr. Yusuf Al-Qardhawi dan Majelis Tarjih.
+**FiqihAI** adalah aplikasi web sistem tanya jawab dan katalog rujukan fiqih kontemporer berbasis kecerdasan buatan (Google Gemini AI & RAG berbasis PostgreSQL).
 
-Pada Week 7, sistem mengintegrasikan tiga pilar utama:
-1. **Halaman Frontend**: Dibangun dengan template engine EJS dan Tailwind CSS CDN, menampilkan live status server, interactive API playground, serta katalog rujukan fikih.
-2. **REST API Endpoints**:
-   - `GET /api/status`: Informasi kesehatan server, uptime, versi, metode SDLC, dan status aplikasi (JSON).
-   - `GET /api/produk`: Katalog modul dan buku rujukan fikih kontemporer yang dikelola melalui Model (Array JSON).
-3. **Middleware Logger**: Mencatat seluruh incoming HTTP request (Method, Path/URL, Status Code, Durasi, Timestamp) ke terminal/console backend serta file `logs/logger.md`.
+Perkembangan tiap minggu:
+1. **Week 7 (Frontend, REST API, & Logger):** Halaman EJS + Tailwind CSS, status server live (`GET /api/status`), katalog awal (`GET /api/produk`), serta middleware logger (`middlewares/logger.js`) yang mencatat setiap HTTP request ke terminal dan `logs/logger.md`.
+2. **Week 8 (PostgreSQL & CRUD Produk):** Migrasi katalog produk ke PostgreSQL (`config/database.js`, `schema.sql`), query `async/await` pada `models/produkModel.js`, dan CRUD penuh (`POST`, `PUT`, `DELETE` `/api/produk`) beserta modal di `views/index.ejs`.
+3. **Week 9 (Chatbot AI & RAG Korpus PDF):** Antarmuka obrolan (`GET /chat` / `views/chat.ejs`), endpoint `POST /api/chat` dengan guardrail input (`middlewares/validateChatInput.js`), pengambilan konteks katalog + potongan PDF (`models/chatModel.js`, tabel `fatwa_chunk`), serta integrasi Gemini API dengan *fallback model* dan sitasi sumber (`services/geminiService.js`).
 
 ---
 
@@ -27,29 +25,61 @@ Pada Week 7, sistem mengintegrasikan tiga pilar utama:
    npm install
    ```
 
-2. **Jalankan Aplikasi**:
+2. **Siapkan Database PostgreSQL**:
+   Buat database (misalnya `fiqih_ai`) lalu jalankan DDL & seed data dari [schema.sql](schema.sql) (membuat tabel `produk` dan `fatwa_chunk`).
+
+3. **Konfigurasi Environment (`.env`)**:
+   Salin `.env.example` menjadi `.env` dan sesuaikan kredensial database serta API key Gemini:
+   ```env
+   DB_USER=postgres
+   DB_HOST=localhost
+   DB_NAME=fiqih_ai
+   DB_PASSWORD=your_password
+   DB_PORT=5432
+   PORT=3000
+
+   # Google Gemini
+   GEMINI_API_KEY=your_gemini_api_key
+   GEMINI_MODEL=gemini-flash-lite-latest
+   GEMINI_FALLBACK_MODEL=gemini-3.1-flash-lite
+   ```
+   Untuk memeriksa daftar model Gemini yang aktif pada API key Anda:
+   ```bash
+   npm run models
+   ```
+
+4. **Impor Korpus PDF ke Tabel `fatwa_chunk`**:
+   Letakkan file PDF di folder `./pdf`, lalu jalankan:
+   ```bash
+   npm run import-pdf
+   ```
+
+5. **Jalankan Aplikasi**:
    ```bash
    npm start
    # atau untuk mode auto-reload (development):
    npm run dev
    ```
 
-3. **Akses Browser**:
-   Buka [http://localhost:3000](http://localhost:3000)
+6. **Akses Browser**:
+   - Halaman Utama & Katalog: `http://localhost:3000/`
+   - Halaman Chatbot AI: `http://localhost:3000/chat`
 
 ---
 
-## 📡 Daftar Endpoint API
+## 📡 Daftar Endpoint API & Halaman
 
 | Endpoint | Method | Keterangan | Format Respon |
 |---|---|---|---|
-| `/` | `GET` | Halaman Web Utama FiqihAI | HTML (EJS View) |
+| `/` | `GET` | Halaman Web Utama & Katalog Modul FiqihAI | HTML (`views/index.ejs`) |
+| `/chat` | `GET` | Halaman Chatbot AI Tanya Fiqih | HTML (`views/chat.ejs`) |
 | `/api/status` | `GET` | Status server, uptime, dan metadata proyek | JSON |
-| `/api/produk` | `GET` | Daftar modul & literatur fikih kontemporer | JSON / Array JSON |
-
-> **Catatan Endpoint `/api/produk`:**  
-> Secara default mengembalikan respon standar `sukses`, `jumlah`, dan `data` array.  
-> Untuk mendapatkan array murni secara langsung, tambahkan parameter query `?format=array` (contoh: `/api/produk?format=array`).
+| `/api/produk` | `GET` | Daftar seluruh modul fiqih (`?format=array` untuk array murni) | JSON |
+| `/api/produk/:id` | `GET` | Detail satu modul berdasarkan ID | JSON |
+| `/api/produk` | `POST` | Tambah modul baru ke PostgreSQL | JSON |
+| `/api/produk/:id` | `PUT` | Perbarui modul berdasarkan ID | JSON |
+| `/api/produk/:id` | `DELETE` | Hapus modul berdasarkan ID | JSON |
+| `/api/chat` | `POST` | Kirim pertanyaan fiqih ke Gemini AI + konteks RAG | JSON (`{ success, data: { reply, sources } }`) |
 
 ---
 
@@ -57,32 +87,32 @@ Pada Week 7, sistem mengintegrasikan tiga pilar utama:
 
 Setiap request yang masuk dicatat secara *real-time*:
 - **Terminal Backend / Console**:  
-  `[2026-10-26T12:00:00.000Z] GET /api/produk - Status: 200 (2.4 ms)`
+  `[2026-11-15T09:00:00.000Z] POST /api/chat - Status: 200 (1850.0 ms)`
 - **File Rekaman**:  
   Tersimpan dalam tabel format Markdown di file `logs/logger.md`.
 
 ---
 
-## 📁 Struktur Folder (Sesuai Ketentuan Tugas)
+## 📁 Struktur Folder
 
 ```text
 Fiqih-ChatbotAI/
-├── config/             # Konfigurasi aplikasi (port, nama, metode SDLC, metadata)
-├── models/             # Abstraksi data (produkModel.js - data modul fikih)
-├── middlewares/        # Middleware Express (logger.js pencatat HTTP request)
-├── controllers/        # Logika pemrosesan (apiController.js, homeController.js)
-├── routes/             # Definisi route & pemetaan endpoint (web.js, api.js, index.js)
-├── views/              # Template EJS dinamis & reusable partials
-│   ├── partials/
-│   │   ├── head.ejs
-│   │   ├── navbar.ejs
-│   │   └── footer.ejs
-│   └── index.ejs
+├── config/             # Konfigurasi aplikasi, database PostgreSQL, dan Gemini AI
+├── controllers/        # Logika endpoint (apiController, homeController, chatController)
+├── logs/               # Rekaman log HTTP request (logger.md)
+├── middlewares/        # Middleware logger & guardrail input chat (validateChatInput.js)
+├── models/             # Query PostgreSQL (produkModel.js, chatModel.js)
+├── pdf/                # Korpus PDF fiqih sumber chunking fatwa_chunk
+├── routes/             # Pemetaan route web & API (web.js, api.js, chat.js, index.js)
+├── scripts/            # Utilitas CLI (importPdf.js, listModels.js)
+├── services/           # Integrasi Google Gemini API & penyusunan konteks (geminiService.js)
 ├── utils/              # Fungsi pembantu reusable (formatRupiah, logger helper)
-├── logs/               # Direktori catatan log request (logger.md)
-├── app.js              # Entry point utama inisialisasi Express & server
+├── views/              # Template EJS (index.ejs, chat.ejs, dan partials/)
+├── .env.example        # Contoh variabel environment
+├── app.js              # Entry point Express & server
+├── schema.sql          # Skema tabel PostgreSQL (produk & fatwa_chunk)
 ├── server.js           # Delegasi backward-compatibility ke app.js
-└── package.json        # Manifest proyek & dependencies (Express, EJS)
+└── package.json        # Manifest proyek, dependencies, & npm scripts
 ```
 
 ---
@@ -91,4 +121,4 @@ Fiqih-ChatbotAI/
 
 > *"Kami memilih metode Waterfall karena alur kerjanya linier dan terstruktur, sehingga spesifikasi sistem dapat dikunci di awal untuk mencegah pembesaran yang tidak diinginkan pada ruang lingkup."*
 
-Metode ini sangat tepat untuk proyek sistem tanya jawab hukum Islam (fikih), di mana batasan korpus rujukan fatwa, standarisasi validasi dalil, dan arsitektur API harus didefinisikan secara presisi sebelum tahap pengkodean dan integrasi model AI dilakukan.
+Metode ini menjaga agar batasan korpus rujukan, validasi input, dan arsitektur API terdefinisi dengan rapi sebelum tahap pengkodean dan integrasi model AI dilakukan.
