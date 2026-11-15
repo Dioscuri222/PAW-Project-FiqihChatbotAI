@@ -90,7 +90,7 @@ async function callModel(model, systemText, userMessage, maxRetry = gemini.maxRe
       clearTimeout(timer);
       if (err instanceof AppError) throw err;
       if (err.name === 'AbortError') {
-        lastErr = new AppError(504, 'Layanan AI tidak merespons tepat waktu. Coba lagi.');
+        throw new AppError(504, 'Layanan AI tidak merespons tepat waktu. Coba lagi.');
       } else {
         console.error('[Gemini] Gagal terhubung:', err.message);
         lastErr = new AppError(503, 'Tidak dapat terhubung ke layanan AI. Periksa koneksi internet server.');
@@ -102,15 +102,16 @@ async function callModel(model, systemText, userMessage, maxRetry = gemini.maxRe
 
 async function callGemini(systemText, userMessage) {
   if (!gemini.apiKey) throw new AppError(503, 'Layanan AI belum dikonfigurasi di server.');
+  const hasFallback = Boolean(gemini.fallbackModel && gemini.fallbackModel !== gemini.model);
 
   try {
-    return await callModel(gemini.model, systemText, userMessage);
+    return await callModel(gemini.model, systemText, userMessage, hasFallback ? 0 : gemini.maxRetry);
   } catch (err) {
     // Hanya pindah ke model cadangan untuk gangguan sementara (sibuk/timeout/jaringan)
-    if (gemini.fallbackModel && gemini.fallbackModel !== gemini.model && [503, 504].includes(err.status)) {
+    if (hasFallback && [503, 504].includes(err.status)) {
       console.warn(`[Gemini] Beralih ke model cadangan: ${gemini.fallbackModel}`);
       try {
-        return await callModel(gemini.fallbackModel, systemText, userMessage, 0);
+        return await callModel(gemini.fallbackModel, systemText, userMessage, gemini.maxRetry);
       } catch (e2) {
         throw err; // tampilkan error model utama (lebih informatif)
       }
@@ -154,10 +155,17 @@ exports.tanya = async (message) => {
     tanpaJawaban = true;
   }
 
-  const sources = tanpaJawaban ? [] : [
+  const rawSources = tanpaJawaban ? [] : [
     ...chunks.map((c) => ({ judul: c.sumber, halaman: c.halaman })),
     ...hasilKatalog.map((p) => ({ judul: p.nama, penulis: p.penulis })),
   ];
+  const seen = new Set();
+  const sources = rawSources.filter((s) => {
+    const key = `${s.judul}#${s.halaman || ''}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
   return { reply, sources };
 };
 
