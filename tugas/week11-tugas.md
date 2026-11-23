@@ -58,7 +58,7 @@ npm test
 npm run test:unit
 
 # Menjalankan integration test saja
-![alt text](image.png)
+npm run test:integration
 
 # Menjalankan seluruh test sekaligus pengukuran code coverage
 npm run test:coverage
