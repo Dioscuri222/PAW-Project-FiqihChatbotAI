@@ -1,0 +1,65 @@
+module.exports = {
+  sampleProduk: {
+    id: 1,
+    nama: 'Hukum Zakat Kontemporer',
+    kategori: 'Zakat & Infak',
+    penulis: 'Prof. Dr. Yusuf Al-Qaradhawi',
+    deskripsi: 'Pembahasan lengkap mengenai zakat profesi, zakat perusahaan, dan distribusi asnaf.',
+    harga: 95000,
+    stok: 12,
+    format: 'PDF & Cetak',
+  },
+
+  sampleProdukList: [
+    {
+      id: 1,
+      nama: 'Hukum Zakat Kontemporer',
+      kategori: 'Zakat & Infak',
+      penulis: 'Prof. Dr. Yusuf Al-Qaradhawi',
+      deskripsi: 'Pembahasan lengkap mengenai zakat profesi, zakat perusahaan, dan distribusi asnaf.',
+      harga: 95000,
+      stok: 12,
+      format: 'PDF & Cetak',
+    },
+    {
+      id: 2,
+      nama: 'Maqashid Syariah Modern',
+      kategori: 'Ushul Fiqih',
+      penulis: 'Prof. Dr. Yusuf Al-Qaradhawi',
+      deskripsi: 'Kajian tujuan syariat Islam dalam menjawab persoalan muamalah dan ibadah modern.',
+      harga: 85000,
+      stok: 8,
+      format: 'PDF',
+    },
+    {
+      id: 3,
+      nama: 'Panduan Thaharah & Shalat',
+      kategori: 'Ibadah',
+      penulis: 'Abdullah bin Ibrahim Al-Qarawy',
+      deskripsi: 'Tata cara bersuci, wudhu, tayammum, dan shalat sesuai dalil shahih.',
+      harga: 65000,
+      stok: 15,
+      format: 'Cetak',
+    },
+  ],
+
+  newProdukPayload: {
+    nama: 'Fiqih Muamalah Digital',
+    kategori: 'Muamalah',
+    penulis: 'Tim FiqihAI',
+    deskripsi: 'Kajian hukum transaksi e-commerce, dompet digital, dan akad modern.',
+    harga: 75000,
+    stok: 20,
+    format: 'PDF',
+  },
+
+  updateProdukPayload: {
+    nama: 'Hukum Zakat Kontemporer (Edisi Revisi)',
+    kategori: 'Zakat & Infak',
+    penulis: 'Prof. Dr. Yusuf Al-Qaradhawi',
+    deskripsi: 'Edisi revisi pembahasan zakat profesi dan nisab kontemporer.',
+    harga: 105000,
+    stok: 10,
+    format: 'PDF & Cetak',
+  },
+};
